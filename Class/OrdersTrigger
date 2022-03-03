@@ -1,0 +1,13 @@
+/**
+Besoin RG-01 et RG-02
+*/
+trigger OrdersTrigger on Order (before update, after delete) {
+
+    if(Trigger.IsBefore && Trigger.isUpdate){
+        OrderController.checkIfOrderHasProducts(Trigger.new);
+    }
+
+    if(Trigger.IsAfter && Trigger.isDelete){
+        OrderController.checkAccountOrders(Trigger.old);
+    }
+}
