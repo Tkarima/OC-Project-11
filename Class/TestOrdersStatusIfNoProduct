@@ -1,0 +1,22 @@
+@isTest
+public with sharing class TestOrdersStatusIfNoProduct {
+    public static testMethod  void TestErrorMessageWhenNoProduct()  {
+        
+        TestData.createOrders(1, 1, 1);
+        
+        List<Order> orders = [SELECT Id, Status FROM Order];
+        
+        Test.startTest();
+        for(Order o: orders) {
+            o.Status = 'Activated';
+        }
+        try {
+            update orders;         
+        } 
+        catch(Exception e) 
+        {
+            System.assert(e.getMessage().contains('Your Order has no Product'));
+        }
+        Test.stopTest();
+    }
+}
