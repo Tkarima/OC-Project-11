@@ -1,0 +1,27 @@
+@isTest
+public class TestActiveCheckbox {
+    
+ public static testMethod  void TestActiveCheckbox()  {
+        
+      TestData.createOrders(1, 1, 1);
+        
+       List<Account> accts =[SELECT Id, Active__c FROM Account];
+       List <Order> myOrder = [SELECT Id FROM Order];
+       List <OrderItem> myOrderItem = [SELECT Id FROM OrderItem ];
+        
+       for (Account acct :accts){
+           acct.Active__c = true;
+       }
+        
+		delete myOrderItem;
+     delete myOrder;
+        
+       Account acct = [SELECT Id, Active__c FROM Account LIMIT 1];
+        
+      
+      System.debug('Status of the account after deletion is : ' + acct.Active__c);
+      Test.startTest();
+  System.assertEquals(false, acct.Active__c);  
+      Test.stopTest();
+  }
+}
