@@ -1,0 +1,62 @@
+/*
+Besoin RG-03
+*/ 
+
+public with sharing class BatchTasks implements Database.Batchable<sObject> {
+
+    public Database.QueryLocator start(Database.BatchableContext bc) {
+        // collecter les lots d'enregistrements ou d'objets à passer à exécuter
+        System.debug('batch start ');
+        
+		return Database.getQueryLocator([SELECT Id, Name, OwnerId FROM Account WHERE Id NOT IN (SELECT AccountId FROM Order)]);
+
+     
+
+    }
+    public void execute(Database.BatchableContext bc, List<Account> scope){
+       
+
+        System.debug('Nombre de Account : ' + scope.size());
+        
+        List<Task> taskList = new List<Task>();
+        Integer recordsProcessed = 0;
+        
+		System.debug('Nombre de Account : ' + scope.size());
+        
+        for (Account account : scope) {
+
+            List<Task> tasks = [SELECT Id, Subject FROM Task WHERE WhatId =:account.Id AND Subject = 'Call'];
+
+            if(tasks.isEmpty()){
+        		System.debug('Account trouvé, nom : ' + account.Name);
+                Task task = new Task();
+
+                task.Subject = 'Call';
+                task.Status = 'New';
+                task.Priority = 'Normal';
+                task.WhatId = account.Id;
+                task.OwnerId = account.OwnerId;
+
+                task.IsReminderSet = true;
+                task.ReminderDateTime = Date.today()+5;
+
+       
+                taskList.add(task);
+                
+                recordsProcessed = recordsProcessed + 1;
+            } 
+            else{delete tasks;}
+        }
+        System.debug('taille de la tasklist : ' + taskList.size());
+        if (taskList.size() > 0){
+          insert taskList; 
+        }
+    }
+    public void finish(Database.BatchableContext bc){
+        AsyncApexJob job = [SELECT Id, Status, NumberOfErrors, JobItemsProcessed, TotalJobItems, CreatedBy.Email
+		                    FROM AsyncApexJob
+		                    WHERE Id = :bc.getJobId()];
+		System.debug(job);
+        System.debug('batch Terminé');
+    }
+}
