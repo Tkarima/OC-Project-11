@@ -1,0 +1,22 @@
+@isTest
+public class TestBatchTasks {
+    
+    @testSetup
+    static void setup() {
+    	TestData.createOrders(200, 0, 0);
+    }
+    
+     @isTest 
+    
+    static void testExecuteBatch() {
+         
+        Test.startTest();
+        BatchTasks bt = new BatchTasks();
+        Id batchId = Database.executeBatch(bt);
+        Test.stopTest();
+
+        List<Task> tasks = [SELECT Id FROM Task];
+        System.assertEquals(200, tasks.size());
+    }
+
+}
