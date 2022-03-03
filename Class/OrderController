@@ -1,0 +1,42 @@
+/**
+Besoin RG-01 et RG-02
+*/ 
+public class OrderController {
+    
+ 
+    
+    
+    public static void checkIfOrderHasProducts (List<Order> orders) {
+
+        for (Order o : orders){
+
+            if (o.Number_of_Products__c == 0 && o.Status == 'Activated'){
+                o.addError('Your Order has no Product');
+            }
+        }
+    }
+
+    public static void checkAccountOrders(List <Order> ordersDeleted) {
+
+        List<Account> accounts  = new List<Account>();
+        Set<Id> accIds          = new Set<Id>();
+
+        for(Order ord : ordersDeleted){
+           
+            accIds.add(ord.AccountId);  
+            //accounts = [SELECT Id, Active__c FROM Account WHERE Id IN :accIds]; 
+        }
+
+        accounts = [SELECT Id, Active__c FROM Account WHERE Id IN :accIds];
+
+        for (Account acc : accounts){
+            
+            List<Order> orders = [SELECT Id FROM Order WHERE AccountId =:acc.Id];
+
+            if (orders.size() == 0){
+                acc.Active__c = false;
+            }
+        }
+        update accounts;
+    }
+}
