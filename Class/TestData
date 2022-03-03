@@ -1,0 +1,62 @@
+public with sharing class TestData {
+        
+    public static void createOrders(Integer nAccounts, Integer nOrders, Integer nItems) {
+        
+        //Create Accounts, Orders, OrderItem
+        List<Account> accts = new List<Account>();
+        List<Order> orders = new List<Order>();
+        List<OrderItem> oitems = new List<OrderItem>();
+        
+        //Create Product
+        Product2 pd1 = new Product2(Name = 'Free', IsActive = true);
+        insert pd1;
+
+        //Create the PricebookEntry
+        PricebookEntry pbe = new PricebookEntry(
+            Pricebook2Id = Test.getStandardPricebookId(), 
+            Product2Id = pd1.Id, 
+            UnitPrice = 5, 
+            IsActive = true
+            );
+        insert pbe;
+        
+        //Create 200 Accounts
+       
+        for(Integer i=0; i<nAccounts; i++) {
+            Account acc1 = new Account(Name = 'Test Account' + i);
+             accts.add(acc1);
+        }
+        insert  accts;
+        
+        //Create Orders associated with Accounts
+        for(Integer i = 0; i < accts.size(); i++) {
+            Account acc = accts[i];
+
+            for(Integer o = 0 ; o < nOrders ; o++) { 
+                orders.add(new Order(
+                    AccountID = acc.id, 
+                    EffectiveDate = Date.today(), 
+                    Pricebook2Id = Test.getStandardPricebookId(), 
+                    Status = 'Draft'
+                    ));
+                }
+            }
+        insert orders;
+
+        //Create OrderItem
+        for (Integer i = 0; i < orders.size(); i++) {
+            Order testOrds = orders[i];
+
+            for(Integer oi = 0; oi < nItems; oi++ ) {
+                oitems.add(new OrderItem(
+                    OrderID             = testOrds.Id, 
+                    Product2Id          = pd1.Id, 
+                    PricebookEntryId    = pbe.Id,
+                    UnitPrice           = 5, 
+                    Quantity            = 1
+                    ));
+                }
+            }
+        insert oitems;
+    }
+    }
