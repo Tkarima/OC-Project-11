@@ -1,0 +1,19 @@
+@isTest
+public class TestActivationIfYesProduct {
+
+public static testMethod  void TestActivationIfYesProduct()  {
+        
+        TestData.createOrders(1, 1, 1);
+        
+        List<Order> orders = [SELECT Id, Status FROM Order];
+        System.debug('orders' + orders.size());
+        Test.startTest();
+        for(Order o: orders) {
+            o.Status = 'Activated';
+        }
+        update orders;
+        System.assertEquals('Activated', orders[0].Status);
+        System.debug('Status 2 is ' + orders[0].Status);
+        Test.stopTest();
+    }
+    }
